@@ -36,15 +36,19 @@ if ($? -eq $false)
 
 Write-Log "check for DistroID `"$distroID`" with winget search"
 $wingetSearch = Start-Process winget -ArgumentList "search --id $distroID" -Wait -NoNewWindow -PassThru
-if($wingetSearch -ne "0")
+if($wingetSearch.ExitCode -ne "0")
 {
     Write-Log "Winget could not find the Distribution." -Level ERROR
     Read-Host -Prompt "Press Key to end Install Process"
 }
 else{
+    Write-Log "Install Distro with ID $distroID"
     $wingetInstall = Start-Process winget -ArgumentList "install -e --id $distroID" -Wait -NoNewWindow -PassThru
-    if($wingetInstall.ExitCode -ne 0)
+    if(0,-1978335189 -notcontains $wingetInstall.ExitCode )
     {
         Write-Log "Error while installing Distro. Exitcode: $($wingetInstall.ExitCode)"
+    }
+    else {
+        Write-Log "Seems its already installed."
     }
 }
