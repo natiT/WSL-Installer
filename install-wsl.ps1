@@ -40,6 +40,7 @@ if($wingetSearch.ExitCode -ne "0")
 {
     Write-Log "Winget could not find the Distribution." -Level ERROR
     Read-Host -Prompt "Press Key to end Install Process"
+    Exit 1
 }
 else{
     Write-Log "Install Distro with ID $distroID"
