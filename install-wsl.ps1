@@ -1,4 +1,3 @@
-#Requires -RunAsAdministrator
 param(
     [CmdletBinding()]
     [Parameter(HelpMessage = "WinGet ID (see https://winget.run/pkg/Canonical) ")]
@@ -6,7 +5,6 @@ param(
     [ValidateSet('LogModule')]
     $LogMode = "LogModule"
 )
-
 if (Get-Module -ListAvailable -Name Logging)
 {
     Write-Host "Loading Logging Module"
@@ -26,7 +24,6 @@ if (Get-Module -Name Logging)
     Add-LoggingTarget -Name File -Configuration @{Path = 'C:\Temp\WSL-Install_%{+%Y%m%d}.log' }
 }
 
-Write-Log -Message "Start Logging installation Process"
 Write-Log -Message "Check for Winget"
 Get-Command winget
 if ($? -eq $false)
@@ -36,29 +33,6 @@ if ($? -eq $false)
     exit 1
 }
 
-Write-Log -Message "Check for required Windows Features"
-if ((Get-WindowsOptionalFeature -FeatureName VirtualMachinePlatform -Online).State -eq "Disabled")
-{
-    $missingFeature = $true
-    Write-Log -Message "VirtualMachinePlatform is not installed. Installing..."
-    Enable-WindowsOptionalFeature -FeatureName VirtualMachinePlatform -Online -NoRestart -All
-}
-if ((Get-WindowsOptionalFeature -FeatureName Microsoft-Windows-Subsystem-Linux -Online).State -eq "Disabled")
-{
-    $missingFeature = $true
-    Write-Log -Message "Microsoft-Windows-Subsystem-Linux is not installed. Installing..."
-    Enable-WindowsOptionalFeature -FeatureName Microsoft-Windows-Subsystem-Linux -Online -NoRestart -All
-}
-if ((Get-WindowsOptionalFeature -FeatureName Microsoft-Hyper-V-All -Online).State -eq "Disabled")
-{
-    $missingFeature = $true
-    Write-Log -Message "Microsoft-Hyper-V-All is not installed. Installing..."
-    Enable-WindowsOptionalFeature -FeatureName Microsoft-Hyper-V-All -Online -NoRestart -All
-}
-
-if($missingFeature -eq $true){
-    Write-Log "Reboot may be required because of the installation of missing Features. If the Script failes. Restart and run again!" -Level WARNING
-}
 
 Write-Log "check for DistroID `"$distroID`" with winget search"
 $wingetSearch = Start-Process winget -ArgumentList "search --id $distroID" -Wait -NoNewWindow -PassThru
@@ -74,5 +48,3 @@ else{
         Write-Log "Error while installing Distro. Exitcode: $($wingetInstall.ExitCode)"
     }
 }
-
-##dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V-All /featurename:VirtualMachinePlatform /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
